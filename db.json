@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "first_name": "Ngo",
+      "last_name": "Dat",
+      "age": 20,
+      "address": "HCM, VN",
+      "active": true
+    }
+  ]
+}
