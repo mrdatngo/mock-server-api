@@ -73,7 +73,7 @@ server.use((req, res, next) => {
   }
 });
 
-server.post('/api/v1/account/detail', (req, res) => {
+server.get('/api/v1/account/detail', (req, res) => {
   let data = req.headers.authorization && req.headers.authorization.split(' ');
   if (data && data.length === 2) {
     let token = data[1];
