@@ -31,7 +31,6 @@ server.get('/echo', (req, res) => {
 
 server.post('/api/v1/login', (req, res) => {
   let { username, password } = req.body;
-  console.log('login param', username, password, req.body);
   if (username == 'admin@gmail.com' && password == '123456') {
     let token = jwt.sign(
       {
@@ -55,7 +54,6 @@ server.post('/api/v1/login', (req, res) => {
 
 // middleware check authentication
 server.use((req, res, next) => {
-  console.log('here', req.headers.authorization);
   let data = req.headers.authorization && req.headers.authorization.split(' ');
   if (data && data.length === 2) {
     let token = data[1];
@@ -64,6 +62,28 @@ server.use((req, res, next) => {
       var decoded = jwt.verify(token, SECRET_KEY);
       if (decoded.username) {
         next();
+      } else {
+        res.sendStatus(401);
+      }
+    } catch {
+      res.sendStatus(401);
+    }
+  } else {
+    res.sendStatus(401);
+  }
+});
+
+server.post('/api/v1/account/detail', (req, res) => {
+  let data = req.headers.authorization && req.headers.authorization.split(' ');
+  if (data && data.length === 2) {
+    let token = data[1];
+    try {
+      var decoded = jwt.verify(token, SECRET_KEY);
+      if (decoded.username) {
+        res.jsonp({
+          username: decoded.username,
+          active: true,
+        });
       } else {
         res.sendStatus(401);
       }
