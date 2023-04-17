@@ -1,8 +1,9 @@
 const jsonServer = require('json-server');
 const jwt = require('jsonwebtoken');
 const server = jsonServer.create();
-const dbRouter = jsonServer.router('db.json');
+const dbRouter = jsonServer.router('/tmp/db.json');
 const cors = require('cors');
+const fs = require('fs');
 const middlewares = jsonServer.defaults({ noCors: true });
 
 const SECRET_KEY = 'secret';
@@ -27,6 +28,16 @@ server.use(jsonServer.bodyParser);
 // Add custom routes before JSON Server router
 server.get('/echo', (req, res) => {
   res.status(200).jsonp(req.query);
+});
+
+server.get('/reset', (req, res) => {
+  fs.writeFile('/tmp/db.json', `{"users": []}`, function (err) {
+    if (err) {
+      console.log('writeFile failed: ' + err);
+    } else {
+      console.log('writeFile succeeded');
+    }
+  });
 });
 
 server.post('/api/v1/login', (req, res) => {
@@ -95,8 +106,13 @@ server.get('/api/v1/account/detail', (req, res) => {
   }
 });
 
+server.use(
+  jsonServer.rewriter({
+    '/api/v1/*': '/$1',
+  })
+);
 // Use default router
-server.use('/api/v1', dbRouter);
+server.use(dbRouter);
 // server.use('/*', (req, res, next) => {
 //   res.jsonb({ message: 'not found!' });
 //   next();

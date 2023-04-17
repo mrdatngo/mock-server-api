@@ -7,6 +7,11 @@
       "age": 20,
       "address": "HCM, VN",
       "active": true
+    },
+    {
+      "email": "test@gmail.com",
+      "name": "Test",
+      "id": 2
     }
   ]
 }
