@@ -34,8 +34,14 @@ server.get('/reset', (req, res) => {
   fs.writeFile('/tmp/db.json', `{"users": []}`, function (err) {
     if (err) {
       console.log('writeFile failed: ' + err);
+      res.jsonp({
+        success: false,
+      });
     } else {
       console.log('writeFile succeeded');
+      res.jsonp({
+        success: true,
+      });
     }
   });
 });
@@ -84,6 +90,27 @@ server.use((req, res, next) => {
   }
 });
 
+// check /tmp/db.json existed
+server.use((req, res, next) => {
+  try {
+    const data = fs.readFileSync('/tmp/db.json', 'utf8');
+    const objs = JSON.parse(data);
+    if (!objs.users) {
+      throw Error('something wrong on db.json, throw error to create!');
+    }
+    next();
+  } catch (err) {
+    fs.writeFile('/tmp/db.json', `{"users": []}`, (err) => {
+      if (err) {
+        console.log('writeFile failed: ' + err);
+      } else {
+        console.log('writeFile succeeded');
+      }
+      next();
+    });
+  }
+});
+
 server.get('/api/v1/account/detail', (req, res) => {
   let data = req.headers.authorization && req.headers.authorization.split(' ');
   if (data && data.length === 2) {
@@ -92,8 +119,10 @@ server.get('/api/v1/account/detail', (req, res) => {
       var decoded = jwt.verify(token, SECRET_KEY);
       if (decoded.username) {
         res.jsonp({
-          username: decoded.username,
+          username: 'admin',
           active: true,
+          role: 'ADMIN',
+          email: decoded.username,
         });
       } else {
         res.sendStatus(401);
