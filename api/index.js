@@ -100,6 +100,7 @@ server.use((req, res, next) => {
     }
     next();
   } catch (err) {
+    console.log(err);
     fs.writeFile('/tmp/db.json', `{"users": []}`, (err) => {
       if (err) {
         console.log('writeFile failed: ' + err);
