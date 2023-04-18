@@ -1,9 +1,7 @@
 const jsonServer = require('json-server');
 const jwt = require('jsonwebtoken');
 const server = jsonServer.create();
-const dbRouter = jsonServer.router('/tmp/db.json');
 const cors = require('cors');
-const fs = require('fs');
 const middlewares = jsonServer.defaults({ noCors: true });
 
 const SECRET_KEY = 'secret';
@@ -28,22 +26,6 @@ server.use(jsonServer.bodyParser);
 // Add custom routes before JSON Server router
 server.get('/echo', (req, res) => {
   res.status(200).jsonp(req.query);
-});
-
-server.get('/reset', (req, res) => {
-  fs.writeFile('/tmp/db.json', `{"users": []}`, function (err) {
-    if (err) {
-      console.log('writeFile failed: ' + err);
-      res.jsonp({
-        success: false,
-      });
-    } else {
-      console.log('writeFile succeeded');
-      res.jsonp({
-        success: true,
-      });
-    }
-  });
 });
 
 server.post('/api/v1/login', (req, res) => {
@@ -90,28 +72,6 @@ server.use((req, res, next) => {
   }
 });
 
-// check /tmp/db.json existed
-server.use((req, res, next) => {
-  try {
-    const data = fs.readFileSync('/tmp/db.json', 'utf8');
-    const objs = JSON.parse(data);
-    if (!objs.users) {
-      throw Error('something wrong on db.json, throw error to create!');
-    }
-    next();
-  } catch (err) {
-    console.log(err);
-    fs.writeFile('/tmp/db.json', `{"users": []}`, (err) => {
-      if (err) {
-        console.log('writeFile failed: ' + err);
-      } else {
-        console.log('writeFile succeeded');
-      }
-      next();
-    });
-  }
-});
-
 server.get('/api/v1/account/detail', (req, res) => {
   let data = req.headers.authorization && req.headers.authorization.split(' ');
   if (data && data.length === 2) {
@@ -142,7 +102,7 @@ server.use(
   })
 );
 // Use default router
-server.use(dbRouter);
+server.use(jsonServer.router({ users: [] }));
 // server.use('/*', (req, res, next) => {
 //   res.jsonb({ message: 'not found!' });
 //   next();

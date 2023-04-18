@@ -19,8 +19,7 @@
   ],
   "functions": {
     "api/index.js": {
-      "memory": 1024,
-      "includeFiles": "/tmp/db.json"
+      "memory": 1024
     }
   },
   "rewrites": [
